@@ -25,6 +25,13 @@ async function run() {
   try {
     const serviceCollection = client.db("tourDB").collection("services");
     const bookingCollection = client.db("tourDB").collection("booking");
+    // post api for service collection
+    app.post("/api/v1/create-service", async (req, res) => {
+      const service = req.body;
+      const result = await serviceCollection.insertOne(service);
+      res.send(result);
+    });
+
     // all service
     // filtered services
 
