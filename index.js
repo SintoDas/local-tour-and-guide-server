@@ -55,7 +55,12 @@ async function run() {
 
     // all booking and find my bookings
     app.get("/api/v1/bookings", async (req, res) => {
-      const result = await bookingCollection.find().toArray();
+      let query = {};
+      if (req.query.email) {
+        query = { userEmail: req.query.email };
+      }
+      console.log(req.query.email);
+      const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
 
