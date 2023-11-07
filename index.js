@@ -37,9 +37,9 @@ async function run() {
 
     app.get("/api/v1/services", async (req, res) => {
       let queryObj = {};
-      const serviceName = req.query.serviceName;
-      if (serviceName) {
-        queryObj.serviceName = serviceName;
+      const providerEmail = req.query.providerEmail;
+      if (providerEmail) {
+        queryObj.providerEmail = providerEmail;
       }
       const cursor = serviceCollection.find(queryObj);
       const result = await cursor.toArray();
@@ -68,6 +68,14 @@ async function run() {
       }
       console.log(req.query.email);
       const result = await bookingCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // delete service id
+    app.delete("/api/v1/services/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await serviceCollection.deleteOne(query);
       res.send(result);
     });
 
