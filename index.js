@@ -52,7 +52,31 @@ async function run() {
       const result = await serviceCollection.findOne(query);
       res.send(result);
     });
-
+    //update service
+    app.put("/api/v1/services/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedService = req.body;
+      const service = {
+        $set: {
+          serviceImage: updatedService.serviceImage,
+          serviceName: updatedService.serviceName,
+          serviceDescription: updatedService.serviceDescription,
+          providerName: updatedService.providerName,
+          providerEmail: updatedService.providerEmail,
+          servicePrice: updatedService.servicePrice,
+          serviceArea: updatedService.serviceArea,
+        },
+      };
+      const result = await serviceCollection.updateOne(
+        filter,
+        service,
+        options
+      );
+      res.send(result);
+    });
     // create booking
     app.post("/api/v1/create-booking", async (req, res) => {
       const booking = req.body;
