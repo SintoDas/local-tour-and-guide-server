@@ -53,6 +53,12 @@ async function run() {
       res.send(result);
     });
 
+    // all booking and find my bookings
+    app.get("/api/v1/bookings", async (req, res) => {
+      const result = await bookingCollection.find().toArray();
+      res.send(result);
+    });
+
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
@@ -68,7 +74,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("LOCAL TOURS AND GUIDE SERVER IS RUNNING");
 });
 
 app.listen(port, () => {
