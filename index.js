@@ -1,19 +1,23 @@
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const app = express();
-const port = 5000;
-// tourGuide
-//QDRMjf4s60LmT3cZ
-// database connection
+require("dotenv").config();
+const port = process.env.PORT || 5000;
+
 // middleWare
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:5173"],
+    credentials: true,
+  })
+);
 app.use(express.json());
+app.use(cookieParser());
+const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.kjin4dh.mongodb.net/tourDB?retryWrites=true&w=majority`;
 
-const uri =
-  "mongodb+srv://tourGuide:QDRMjf4s60LmT3cZ@cluster0.kjin4dh.mongodb.net/tourDB?retryWrites=true&w=majority";
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -25,6 +29,24 @@ async function run() {
   try {
     const serviceCollection = client.db("tourDB").collection("services");
     const bookingCollection = client.db("tourDB").collection("booking");
+
+    const verifyToken = (req, res, next) => {
+      const token = req.cookies?.token;
+      // console.log("token the middleware", token);
+      // no token available
+      if (!token) {
+        return res.status(401).send({ message: "unauthorized access token" });
+      }
+      jwt.verify(token, process.env.TOKEN_ACCESS_SECRET, (err, decoded) => {
+        if (err) {
+          return res.status(401).send({ message: "unauthorized access" });
+        }
+        req.user = decoded;
+        next();
+      });
+      // next()
+    };
+
     // post api for service collection
     app.post("/api/v1/create-service", async (req, res) => {
       const service = req.body;
@@ -85,7 +107,8 @@ async function run() {
     });
 
     // all booking and find my bookings
-    app.get("/api/v1/bookings", async (req, res) => {
+    app.get("/api/v1/bookings", verifyToken, async (req, res) => {
+      console.log("cookie", req.cookies);
       let query = {};
       if (req.query.email) {
         query = { userEmail: req.query.email };
@@ -101,6 +124,24 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await serviceCollection.deleteOne(query);
       res.send(result);
+    });
+
+    //auth api
+    app.post("/api/v1/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, secret, { expiresIn: "1h" });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        })
+        .send({ success: true });
+    });
+    app.post("/api/v1/logOut", async (req, res) => {
+      const user = req.body;
+      console.log("logging out", user);
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
     // Connect the client to the server	(optional starting in v4.7)
