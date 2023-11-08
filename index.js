@@ -10,7 +10,12 @@ const port = process.env.PORT || 5000;
 // middleWare
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      // "local-tours-and-guide-3eeda.web.app",
+      // "local-tours-and-guide-3eeda.firebaseapp.com",
+    ],
     credentials: true,
   })
 );
@@ -60,6 +65,10 @@ async function run() {
     app.get("/api/v1/services", async (req, res) => {
       let queryObj = {};
       const providerEmail = req.query.providerEmail;
+      const serviceName = req.query.serviceName;
+      if (serviceName) {
+        queryObj.serviceName = serviceName;
+      }
       if (providerEmail) {
         queryObj.providerEmail = providerEmail;
       }
@@ -129,7 +138,10 @@ async function run() {
     //auth api
     app.post("/api/v1/jwt", async (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, secret, { expiresIn: "1h" });
+      console.log(req.cookies.token);
+      const token = jwt.sign(user, process.env.TOKEN_ACCESS_SECRET, {
+        expiresIn: "1h",
+      });
       res
         .cookie("token", token, {
           httpOnly: true,
@@ -138,6 +150,7 @@ async function run() {
         })
         .send({ success: true });
     });
+
     app.post("/api/v1/logOut", async (req, res) => {
       const user = req.body;
       console.log("logging out", user);
