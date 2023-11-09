@@ -11,10 +11,8 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      // "local-tours-and-guide-3eeda.web.app",
-      // "local-tours-and-guide-3eeda.firebaseapp.com",
+      "https://local-tours-and-guide-3eeda.web.app",
+      "https://local-tours-and-guide-3eeda.firebaseapp.com",
     ],
     credentials: true,
   })
