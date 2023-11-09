@@ -137,6 +137,30 @@ async function run() {
       const result = await bookingCollection.findOne(query);
       res.send(result);
     });
+    // update bookings
+    // app.put("/api/v1/bookings/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const filter = { _id: new ObjectId(id) };
+    //   const options = { upsert: true };
+    //   const updatedBooking = req.body;
+    //   const booking = {
+    //     $set: {
+    //       serviceImage: updatedBooking.serviceImage,
+    //       serviceName: updatedBooking.serviceName,
+    //       serviceDescription: updatedBooking.serviceDescription,
+    //       providerName: updatedBooking.providerName,
+    //       providerEmail: updatedBooking.providerEmail,
+    //       servicePrice: updatedBooking.servicePrice,
+    //       serviceArea: updatedBooking.serviceArea,
+    //     },
+    //   };
+    //   const result = await bookingCollection.updateOne(
+    //     filter,
+    //     booking,
+    //     options
+    //   );
+    //   res.send(result);
+    // });
 
     // delete service id
     app.delete("/api/v1/services/:id", async (req, res) => {
