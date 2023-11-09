@@ -119,10 +119,15 @@ async function run() {
     app.get("/api/v1/bookings", verifyToken, async (req, res) => {
       console.log("cookie", req.cookies);
       let query = {};
-      if (req.query.email) {
-        query = { userEmail: req.query.email };
+      const providerEmail = req.query.providerEmail;
+      if (providerEmail) {
+        query.providerEmail = providerEmail;
       }
-      console.log(req.query.email);
+      const userEmail = req.query.userEmail;
+      if (userEmail) {
+        query.userEmail = userEmail;
+      }
+
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
