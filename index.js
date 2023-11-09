@@ -131,6 +131,12 @@ async function run() {
       const result = await bookingCollection.find(query).toArray();
       res.send(result);
     });
+    app.get("/api/v1/bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookingCollection.findOne(query);
+      res.send(result);
+    });
 
     // delete service id
     app.delete("/api/v1/services/:id", async (req, res) => {
@@ -143,7 +149,6 @@ async function run() {
     //auth api
     app.post("/api/v1/jwt", async (req, res) => {
       const user = req.body;
-      console.log(req.cookies.token);
       const token = jwt.sign(user, process.env.TOKEN_ACCESS_SECRET, {
         expiresIn: "1h",
       });
@@ -158,7 +163,6 @@ async function run() {
 
     app.post("/api/v1/logOut", async (req, res) => {
       const user = req.body;
-      console.log("logging out", user);
       res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
