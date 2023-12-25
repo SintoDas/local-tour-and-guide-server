@@ -3,6 +3,9 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+
+const http = require("http");
+const socketIO = require("socket.io");
 const app = express();
 require("dotenv").config();
 const port = process.env.PORT || 5000;
@@ -11,14 +14,16 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: [
-      "https://local-tours-and-guide-3eeda.web.app",
-      "https://local-tours-and-guide-3eeda.firebaseapp.com",
+      "http://localhost:5173",
+      // "https://local-tours-and-guide-3eeda.web.app",
+      // "https://local-tours-and-guide-3eeda.firebaseapp.com",
     ],
     credentials: true,
   })
 );
 app.use(express.json());
 app.use(cookieParser());
+
 const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.USER_PASS}@cluster0.kjin4dh.mongodb.net/tourDB?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, {
@@ -32,6 +37,7 @@ async function run() {
   try {
     const serviceCollection = client.db("tourDB").collection("services");
     const bookingCollection = client.db("tourDB").collection("booking");
+    const reviewCollection = client.db("tourDB").collection("review");
 
     const verifyToken = (req, res, next) => {
       const token = req.cookies?.token;
@@ -54,6 +60,16 @@ async function run() {
     app.post("/api/v1/create-service", async (req, res) => {
       const service = req.body;
       const result = await serviceCollection.insertOne(service);
+      res.send(result);
+    });
+    app.post("/api/v1/create-review", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+
+    app.get("/api/v1/reviews", async (req, res) => {
+      const result = await reviewCollection.find().toArray();
       res.send(result);
     });
 
@@ -116,6 +132,7 @@ async function run() {
     // all booking and find my bookings
     app.get("/api/v1/bookings", verifyToken, async (req, res) => {
       console.log("cookie", req.cookies);
+      // verifyToken
       let query = {};
       const providerEmail = req.query.providerEmail;
       if (providerEmail) {
@@ -168,7 +185,7 @@ async function run() {
       res.send(result);
     });
 
-    //auth api
+    // auth api
     app.post("/api/v1/jwt", async (req, res) => {
       const user = req.body;
       const token = jwt.sign(user, process.env.TOKEN_ACCESS_SECRET, {
